@@ -22,6 +22,7 @@ from qdpmc.tools.helper import (
     arr_scalar_converter,
     merge_days,
     merge_days_tuple,
+    check_ko_path,
     check_up_settle_idx
 )
 from qdpmc.tools.payoffs import plain_vanilla
@@ -37,13 +38,21 @@ class StandardPhoenix(StructureMC):
             self, spot, barrier_out, barrier_in, barrier_coupon, ob_days_in,
             ob_days_out, ob_days_coupon, ko_coupon, maturity_coupon, delta_coupon
     ):
-        if barrier_in == 0.0:
+        if barrier_in != 0.0:
+            self.barrier_in = arr_scalar_converter(barrier_in, ob_days_in)
+            self.log_barrier_in = np.log(self.barrier_in / spot)
+            self.is_knock_in = False
+        else:
             self.is_knock_in = True
+        if barrier_coupon != 0.0:
+            self.barrier_coupon = arr_scalar_converter(barrier_coupon, ob_days_coupon)
+            self.log_barrier_coupon = np.log(self.barrier_coupon / spot)
+            self.settled_anytime=False
+        else:
+            self.settled_anytime=True
         self._spot = spot
         self._strike = spot
         self.barrier_out = arr_scalar_converter(barrier_out, ob_days_out)
-        self.barrier_in = arr_scalar_converter(barrier_in, ob_days_in)
-        self.barrier_coupon = arr_scalar_converter(barrier_coupon, ob_days_coupon)
         self.ob_days_in = ob_days_in
         self.ob_days_coupon = ob_days_coupon
         self.ob_days_out = ob_days_out
@@ -51,9 +60,7 @@ class StandardPhoenix(StructureMC):
         self.maturity_coupon =  arr_scalar_converter(maturity_coupon, ob_days_coupon)
         self.delta_coupon = arr_scalar_converter(delta_coupon, ob_days_coupon)
         self.full_coupon = maturity_coupon
-
         self.log_barrier_out = np.log(self.barrier_out / spot)
-        self.log_barrier_coupon = np.log(self.barrier_coupon/spot)
         _t, self._idx_in, self._idx_out, self._idx_coupon = merge_days_tuple(ob_days_in,
                                                                              ob_days_out, ob_days_coupon)
         self._sim_t_array = np.append([0], _t)
@@ -70,19 +77,42 @@ class StandardPhoenix(StructureMC):
 
     @DocstringWriter(_pv_log_paths_docs)
     def pv_log_paths(self, log_paths, df):
-        df_ko_obs = df[self._idx_out]
         _df = df[-1]
-        ko_t_idx, _, nko_idx = up_ko_t_and_surviving_paths(log_paths[:, self._idx_out],
-                                                           self.log_barrier_out,
-                                                           return_idx=True)
-        df_settle_obs = df[self._idx_coupon]
-        settle_t_idx, _ = check_up_settle_idx(log_paths[:, self._idx_coupon],
-                                                       self.log_barrier_coupon,
-                                                       return_idx=True)
-        pv_out = self.ko_coupon[ko_t_idx] * df_ko_obs[ko_t_idx]
+        # todo: check the path matrix again
+        n_paths, T_full = log_paths.shape
+        mask_coupon = np.asarray(self._idx_coupon, dtype=bool)
+        mask_out = np.asarray(self._idx_out, dtype=bool)
+        coupon_idx = np.flatnonzero(mask_coupon)
+        out_idx = np.flatnonzero(mask_out)
+        df_settle_obs = df[mask_coupon]
+        pv_per_obs = self.delta_coupon * df_settle_obs
 
-        pv_settlement =  self.delta_coupon[settle_t_idx] * df_settle_obs[settle_t_idx]
-        paths_nko = log_paths[nko_idx]
+        ko_t_idx_out, ko_mask, nko_mask = check_ko_path(
+            log_paths[:, mask_out], self.log_barrier_out, return_idx=True
+        )
+
+        df_ko_obs = df[mask_out]
+        pv_out = np.zeros(len(log_paths), dtype=float)
+        pv_out[ko_mask] = self.ko_coupon[ko_t_idx_out[ko_mask]] * df_ko_obs[ko_t_idx_out[ko_mask]]
+        ko_full_idx = np.where(ko_t_idx_out >= 0, out_idx[ko_t_idx_out], -1)
+        pos_in_coupon = np.searchsorted(coupon_idx, ko_full_idx, side="right") - 1
+        pos_in_coupon = np.where(ko_full_idx < 0, len(coupon_idx) - 1, pos_in_coupon)
+        pv_settlement = np.zeros(len(log_paths), dtype=float)
+        if self.settled_anytime:
+            pay_mask = np.ones((n_paths, len(coupon_idx)), dtype=bool)
+        else:
+            pay_mask = (log_paths[:, mask_coupon] >= self.log_barrier_coupon)
+        t_idx_coupon = np.arange(len(coupon_idx))[None, :]
+        alive_mask = (t_idx_coupon <= pos_in_coupon[:, None])
+
+        coupon_matrix = pay_mask * alive_mask * pv_per_obs[None, :]
+        pv_settlement = coupon_matrix.sum(axis=1)
+
+        paths_nko = log_paths[nko_mask]
+        df_ko_obs = df[mask_out]
+        pv_out = np.zeros(n_paths, dtype=float)
+        valid_ko = (ko_t_idx_out >= 0)
+        pv_out[valid_ko] = self.ko_coupon[ko_t_idx_out[valid_ko]] * df_ko_obs[ko_t_idx_out[valid_ko]]
 
         if self.is_knock_in:
             pv_in = -plain_vanilla(
@@ -246,15 +276,15 @@ class UpOutDownIn(StructureMC):
 if __name__ == "__main__":
     from qdpmc import *
 
-    daily_d_arr = list(range(1, 253))
+    daily_d_arr = [253]
     monthly_d_arr = list(range(21, 253, 21))
-    settle_rebate = np.linspace(15 / 12, 15, 12)
+    settle_rebate = np.ones(12) * 1.5
     coupon_rebate = np.zeros(12)
-    mc = MonteCarlo(100, 1000000)
+    mc = MonteCarlo(100, 100)
     bs = BlackScholes(0.03, 0.03, 0.22, 244)
-    dcn = StandardPhoenix(spot=100.0, barrier_out=100.0, barrier_in=0.0, barrier_coupon=80.0,
+    fcn = StandardPhoenix(spot=100.0, barrier_out=100.0, barrier_in=80.0, barrier_coupon=0.0,
                           ob_days_in=daily_d_arr, ob_days_out=monthly_d_arr,
-                          ob_days_coupon=coupon_rebate, ko_coupon=coupon_rebate, maturity_coupon=0.0,
+                          ob_days_coupon=monthly_d_arr, ko_coupon=coupon_rebate, maturity_coupon=0.0,
                           delta_coupon=settle_rebate)
-    print(dcn.calc_value(mc, bs))
+    print(fcn.calc_value(mc, bs))
 

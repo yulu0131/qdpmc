@@ -111,6 +111,18 @@ def down_ki_paths(paths, barrier, return_idx):
     return ki
 
 
+def check_ko_path(paths, barrier, return_idx=True):
+    hit = (paths >= barrier)
+    ko_mask = hit.any(axis=1)
+    nko_mask = ~ko_mask
+    first_idx = hit.argmax(axis=1)
+    ko_t_idx = np.where(ko_mask, first_idx, -1)
+
+    if return_idx:
+        return ko_t_idx, ko_mask, nko_mask
+    else:
+        return ko_t_idx[ko_mask], paths[ko_mask], paths[nko_mask]
+
 def up_ko_t_and_surviving_paths(paths, barrier, return_idx):
     ko_path_idx = np.any(paths >= barrier, axis=1)
     nko_idx = np.logical_not(ko_path_idx)
@@ -121,13 +133,13 @@ def up_ko_t_and_surviving_paths(paths, barrier, return_idx):
     nko_paths = paths[nko_idx]
     return ko_t, ko_paths, nko_paths
 
-def check_up_settle_idx(paths, settle_barrier, return_idx):
+def check_up_settle_idx(paths, settle_barrier,
+                        return_idx):
     settle_path_idx = np.any(paths >= settle_barrier, axis=1)
     settle_paths = paths[settle_path_idx]
-    settle_t = np.argmax(settle_paths >= settle_barrier, axis=1)
     if return_idx:
-        return settle_t, settle_path_idx
-    return settle_t, settle_paths
+        return settle_path_idx
+    return settle_paths
 
 def down_ko_t_and_surviving_paths(paths, barrier, return_idx):
     ko_path_idx = np.any(paths <= barrier, axis=1)
