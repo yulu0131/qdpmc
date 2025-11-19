@@ -2,6 +2,10 @@
 
 > UPDATE: 19th November 2025
 
+```bash
+    pip install pyoptmc --upgrade
+```
+
 This is a package for pricing
 path-dependent options using Monte Carlo Simulation
 under Black-Scholes market dynamics.
