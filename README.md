@@ -1,6 +1,6 @@
 # Monte Carlo Method for Option Pricing
 
-> UPDATE: 12th November 2025 
+> UPDATE: 17th November 2025 
 
 This is a package for pricing
 path-dependent options using Monte Carlo Simulation

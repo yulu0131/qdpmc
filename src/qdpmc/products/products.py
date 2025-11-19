@@ -1,4 +1,6 @@
 import datetime
+# from abc import ABC, abstractmethod
+import numpy as np
 import qdpmc.structures as structures
 import qdpmc.tools.payoffs as pay
 from functools import partial
@@ -7,7 +9,7 @@ from qdpmc.dateutil import Calendar
 from scipy.optimize import fsolve
 from numpy import array, any, argmax
 
-__all__ = ['SnowballProd']
+__all__ = ['SnowballProd', 'PhoenixProd']
 
 
 def _interval_coupon(
@@ -38,6 +40,14 @@ def _update_day_arr(arr, offset, *more):
     if more:
         return nn, *(m[len(arr) - len(nn):] for m in more)
     return nn
+
+def _compute_coupons(dates, start_date, spot, coupon_rate):
+    first = (dates[0] - start_date).days / 365.0
+    diffs = [(dates[i] - dates[i - 1]).days / 365.0 for i in range(1, len(dates))]
+    ttms = np.array([first] + diffs, dtype=float)
+    coupons = ttms * coupon_rate * spot
+
+    return coupons
 
 
 def _check_ob_dates(ob_dates, calendar):
@@ -72,6 +82,89 @@ def _check_calendar(calendar):
         raise TypeError("calendar must be Calendar object")
     return calendar
 
+# class Product(ABC):
+#     def __init__(self):
+#         pass
+
+
+class PhoenixProd:
+    def __init__(
+            self,
+            start_date,
+            end_date,
+            initial_price,
+            settlement_barrier,
+            settlement_dates,
+            settlement_coupon_rate,
+            ko_barrier,
+            ko_ob_dates,
+            ki_barrier,
+            ki_ob_dates,
+            calendar: Calendar = None
+    ):
+        _inputs = locals()
+        _inputs.pop("self")
+        self._inputs = _inputs
+
+        if calendar is None:
+            calendar = Calendar()
+        # check values
+        self.ki_barrier = ki_barrier
+        self.ko_barrier = ko_barrier
+        self.settlement_barrier = settlement_barrier
+        self.settlement_coupon_rate = settlement_coupon_rate
+        calendar = _check_calendar(calendar)
+        start_date = _check_is_trading(start_date, calendar)
+        ko_ob_dates = _check_ob_dates(ko_ob_dates, calendar)
+        settlement_dates = _check_ob_dates(settlement_dates, calendar)
+        try:
+            # check if ki_ob_dates are trading
+            ki_ob_dates = _check_ob_dates(ki_ob_dates, calendar)
+        except TypeError:
+            # return default daily dates
+            if ki_ob_dates != "daily":
+                raise ValueError(
+                    "ki_ob_dates must either be an array of "
+                    "trading days or 'daily, got {}".format(ki_ob_dates)
+                )
+            else:
+                end = ko_ob_dates[-1]
+                ki_ob_dates = calendar.trading_days_between(
+                    start=start_date, end=end, endpoints=True
+                )[1:]
+        self.ob_days_out = calendar.to_scalar(ko_ob_dates, start_date)
+        self.ob_days_in = calendar.to_scalar(ki_ob_dates, start_date)
+        self.ob_days_settled = calendar.to_scalar(settlement_dates, start_date)
+        self.calendar = calendar
+        self.settlement_coupons = _compute_coupons(settlement_dates, start_date, initial_price,
+                                                   settlement_coupon_rate)
+        self.start_date = start_date
+
+    def to_structure(self, valuation_date, spot, ki_flag):
+        if ki_flag:
+            self.ki_barrier = 0.0
+        valuation_date = _check_is_trading(valuation_date, self.calendar)
+        td = self.calendar.num_trading_days_between(
+            start=self.start_date, end=valuation_date, count_end=True
+        )
+        ob_days_out = _update_day_arr(self.ob_days_out, td)
+        ob_days_out = np.array(ob_days_out[0])
+        ob_days_settled = _update_day_arr(self.ob_days_settled, td)
+        ob_days_settled = np.array(ob_days_settled[0])
+        ob_days_in = _update_day_arr(self.ob_days_in, td)
+        ob_days_in = np.array(ob_days_in[0])
+        obj = structures.StandardPhoenix(spot, self.ko_barrier, self.ki_barrier, self.settlement_barrier,
+                                         ob_days_in, ob_days_out, ob_days_settled,
+                                         self.settlement_coupons,
+                                         0.0 * np.ones(len(ob_days_out)),
+                                         0.0)
+
+        return obj
+
+
+    def value(self, valuation_date, spot, ki_flag, *args, **kwargs):
+        return self.to_structure(valuation_date, spot, ki_flag).calc_value(
+            *args, **kwargs)
 
 class SnowballProd:
     """A snowball structure is an autocallable structured product with snowballing
@@ -372,4 +465,32 @@ class DownIn(SingleBarrierOption):
 
 
 if __name__ == "__main__":
-    pass
+    from qdpmc.products import *
+    from qdpmc.dateutil.date import Calendar
+    from qdpmc import MonteCarlo, BlackScholes
+    from qdpmc import Payoff
+    calendar = Calendar()
+
+    start_date = datetime.date(2025, 11, 5)
+    ko_ob_dates = calendar.periodic(start_date, '1M', 13, "next")[1:]
+
+    mc = MonteCarlo(100, 1000000)
+    bs = BlackScholes(0.03, 0, 0.265, 244)
+
+
+    phx = PhoenixProd(
+        start_date= start_date,
+        end_date = ko_ob_dates[-1],
+        initial_price = 100.0,
+        settlement_barrier =80.0,
+        settlement_dates = ko_ob_dates,
+        settlement_coupon_rate = 0.15,
+        ko_barrier = 100.0,
+        ko_ob_dates = ko_ob_dates,
+        ki_barrier = 0.0,
+        ki_ob_dates = "daily",
+        ko_coupon_rate = 0.0,
+        maturity_coupon_rate = 0.0,
+        calendar = calendar)
+
+    print(phx.value(start_date, 100.0, True, mc, bs))

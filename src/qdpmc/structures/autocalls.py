@@ -30,13 +30,15 @@ from qdpmc.structures.base import StructureMC
 from qdpmc.structures._docs import _pv_log_paths_docs
 from qdpmc._decorators import DocstringWriter
 
-__all__ = ['StandardSnowball', 'UpOutDownIn', 'StandardPhoenix']
+__all__ = ['StandardPhoenix', 'StandardSnowball', 'UpOutDownIn', 'StandardPhoenix']
+
+
 
 
 class StandardPhoenix(StructureMC):
     def __init__(
             self, spot, barrier_out, barrier_in, barrier_coupon, ob_days_in,
-            ob_days_out, ob_days_coupon, ko_coupon, maturity_coupon, delta_coupon
+            ob_days_out, ob_days_coupon, delta_coupons, ko_coupon, maturity_coupon
     ):
         if barrier_in != 0.0:
             self.barrier_in = arr_scalar_converter(barrier_in, ob_days_in)
@@ -58,7 +60,7 @@ class StandardPhoenix(StructureMC):
         self.ob_days_out = ob_days_out
         self.ko_coupon = arr_scalar_converter(ko_coupon, ob_days_out)
         self.maturity_coupon =  arr_scalar_converter(maturity_coupon, ob_days_coupon)
-        self.delta_coupon = arr_scalar_converter(delta_coupon, ob_days_coupon)
+        self.delta_coupon = arr_scalar_converter(delta_coupons, ob_days_coupon)
         self.full_coupon = maturity_coupon
         self.log_barrier_out = np.log(self.barrier_out / spot)
         _t, self._idx_in, self._idx_out, self._idx_coupon = merge_days_tuple(ob_days_in,
@@ -78,7 +80,6 @@ class StandardPhoenix(StructureMC):
     @DocstringWriter(_pv_log_paths_docs)
     def pv_log_paths(self, log_paths, df):
         _df = df[-1]
-        # todo: check the path matrix again
         n_paths, T_full = log_paths.shape
         mask_coupon = np.asarray(self._idx_coupon, dtype=bool)
         mask_out = np.asarray(self._idx_out, dtype=bool)
@@ -97,7 +98,6 @@ class StandardPhoenix(StructureMC):
         ko_full_idx = np.where(ko_t_idx_out >= 0, out_idx[ko_t_idx_out], -1)
         pos_in_coupon = np.searchsorted(coupon_idx, ko_full_idx, side="right") - 1
         pos_in_coupon = np.where(ko_full_idx < 0, len(coupon_idx) - 1, pos_in_coupon)
-        pv_settlement = np.zeros(len(log_paths), dtype=float)
         if self.settled_anytime:
             pay_mask = np.ones((n_paths, len(coupon_idx)), dtype=bool)
         else:
@@ -110,13 +110,13 @@ class StandardPhoenix(StructureMC):
 
         paths_nko = log_paths[nko_mask]
         df_ko_obs = df[mask_out]
-        pv_out = np.zeros(n_paths, dtype=float)
         valid_ko = (ko_t_idx_out >= 0)
-        pv_out[valid_ko] = self.ko_coupon[ko_t_idx_out[valid_ko]] * df_ko_obs[ko_t_idx_out[valid_ko]]
+        pv_out = self.ko_coupon[ko_t_idx_out[valid_ko]] * df_ko_obs[ko_t_idx_out[valid_ko]]
 
         if self.is_knock_in:
+            ki_paths = log_paths[~ko_mask]
             pv_in = -plain_vanilla(
-                np.exp(paths_nko[:, -1]) * self.spot, self._strike, option_type='put'
+                np.exp(ki_paths[:, -1]) * self.spot, self._strike, option_type='put'
             ) * _df
             return (pv_out.sum() + pv_in.sum() + pv_settlement.sum()) / len(log_paths)
         ki_paths = down_ki_paths(paths_nko[:, self._idx_in], self.log_barrier_in,
@@ -276,15 +276,45 @@ class UpOutDownIn(StructureMC):
 if __name__ == "__main__":
     from qdpmc import *
 
-    daily_d_arr = [253]
-    monthly_d_arr = list(range(21, 253, 21))
-    settle_rebate = np.ones(12) * 1.5
-    coupon_rebate = np.zeros(12)
-    mc = MonteCarlo(100, 100)
-    bs = BlackScholes(0.03, 0.03, 0.22, 244)
-    fcn = StandardPhoenix(spot=100.0, barrier_out=100.0, barrier_in=80.0, barrier_coupon=0.0,
-                          ob_days_in=daily_d_arr, ob_days_out=monthly_d_arr,
-                          ob_days_coupon=monthly_d_arr, ko_coupon=coupon_rebate, maturity_coupon=0.0,
-                          delta_coupon=settle_rebate)
-    print(fcn.calc_value(mc, bs))
+    # daily_d_arr = [253]
+    # monthly_d_arr = list(range(21, 253, 21))
+    # settle_rebate = np.ones(12) * 1.5
+    # coupon_rebate = np.zeros(12)
+    # mc = MonteCarlo(100, 1000000)
+    # bs = BlackScholes(0.03, 0.03, 0.22, 244)
+    # fcn = StandardPhoenix(spot=100.0, barrier_out=100.0, barrier_in=80.0, barrier_coupon=0.0,
+    #                       ob_days_in=daily_d_arr, ob_days_out=monthly_d_arr,
+    #                       ob_days_coupon=monthly_d_arr, ko_coupon=coupon_rebate, maturity_coupon=0.0,
+    #                       delta_coupon=settle_rebate)
+    import datetime
+    from qdpmc.products import PhoenixProd
+    from qdpmc.dateutil.date import Calendar
+    from qdpmc import MonteCarlo, BlackScholes
+    from qdpmc import Payoff
+
+    calendar = Calendar()
+
+    start_date = datetime.date(2025, 11, 5)
+    ko_ob_dates = calendar.periodic(start_date, '1M', 13, "next")[1:]
+
+    mc = MonteCarlo(100, 1000000)
+    bs = BlackScholes(0.03, 0, 0.265, 244)
+    end_date = ko_ob_dates[-1]
+
+    fcn = PhoenixProd(
+        start_date=start_date,
+        end_date=end_date,
+        initial_price=100.0,
+        settlement_barrier=0.0,
+        settlement_dates=ko_ob_dates,
+        settlement_coupon_rate=0.15,
+        ko_barrier=100.0,
+        ko_ob_dates=ko_ob_dates,
+        ki_barrier=80.0,
+        ki_ob_dates=[end_date],
+        ko_coupon_rate=0.0,
+        maturity_coupon_rate=0.0,
+        calendar=calendar)
+    structure = fcn.to_structure(start_date, 100.0, False)
+    print(structure.calc_value(mc, bs))
 

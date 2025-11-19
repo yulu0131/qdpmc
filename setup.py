@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 install_requires = ["numpy",
-                    "joblib>=0.17.0",
+                    "joblib>=1.5.2",
                     "scipy>=1.7.1",
                     "numba"]
 
@@ -9,9 +9,8 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    # these rarely change
     name="QdpMC",
-    description='A package for pricing OTC option via Monte Carlo',
+    description='A package for pricing OTC options using a vectorized Monte Carlo method.',
     long_description=long_description,
     long_description_content_type='text/markdown',
     classifiers=[
@@ -20,9 +19,9 @@ setup(
     ],
     keywords='derivatives, finance',
     license='Free for non-commercial use',
-    author='Yield Chain Developers',
-    author_email='luyudso@gmail.com',
-    url='http://yulu0131.github.io/',
+    author='YieldChain Developers',
+    author_email='dev@yieldchain.com',
+    url='http://www.yieldchain.com/qdpmc/',
     package_dir={'': 'src'},
     packages=find_packages(where='src'),
     python_requires='>=3.8',

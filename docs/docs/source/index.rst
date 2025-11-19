@@ -8,6 +8,8 @@
 
    This package is under active development.
 
+   Last Update Date: 17th November 2025
+
    Feedback and questions: dev@yieldchain.com
 
 ``qdpmc`` is a Python package for pricing path-dependent options
