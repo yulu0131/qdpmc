@@ -275,17 +275,6 @@ class UpOutDownIn(StructureMC):
 
 if __name__ == "__main__":
     from qdpmc import *
-
-    # daily_d_arr = [253]
-    # monthly_d_arr = list(range(21, 253, 21))
-    # settle_rebate = np.ones(12) * 1.5
-    # coupon_rebate = np.zeros(12)
-    # mc = MonteCarlo(100, 1000000)
-    # bs = BlackScholes(0.03, 0.03, 0.22, 244)
-    # fcn = StandardPhoenix(spot=100.0, barrier_out=100.0, barrier_in=80.0, barrier_coupon=0.0,
-    #                       ob_days_in=daily_d_arr, ob_days_out=monthly_d_arr,
-    #                       ob_days_coupon=monthly_d_arr, ko_coupon=coupon_rebate, maturity_coupon=0.0,
-    #                       delta_coupon=settle_rebate)
     import datetime
     from qdpmc.products import PhoenixProd
     from qdpmc.dateutil.date import Calendar
@@ -301,20 +290,17 @@ if __name__ == "__main__":
     bs = BlackScholes(0.03, 0, 0.265, 244)
     end_date = ko_ob_dates[-1]
 
-    fcn = PhoenixProd(
+    standard_phx = PhoenixProd(
         start_date=start_date,
         end_date=end_date,
         initial_price=100.0,
-        settlement_barrier=0.0,
+        settlement_barrier=80.0,
         settlement_dates=ko_ob_dates,
         settlement_coupon_rate=0.15,
         ko_barrier=100.0,
         ko_ob_dates=ko_ob_dates,
         ki_barrier=80.0,
-        ki_ob_dates=[end_date],
-        ko_coupon_rate=0.0,
-        maturity_coupon_rate=0.0,
+        ki_ob_dates="daily",
         calendar=calendar)
-    structure = fcn.to_structure(start_date, 100.0, False)
-    print(structure.calc_value(mc, bs))
 
+    print(standard_phx.value(start_date, 100.0, False, mc, bs, request_greeks=True))

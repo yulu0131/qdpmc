@@ -32,6 +32,9 @@ class StructureMC(OptionABC):
     def pv_log_paths(self, log_paths, df):
         pass
 
+    def calc_single_batch(self, engine, process, *args, **kwargs):
+        return engine.single_iter_caller(self, process, *args, **kwargs)
+
     def _set_spot(self, val):
         pass
 
