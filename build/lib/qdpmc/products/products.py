@@ -1,9 +1,9 @@
 import datetime
-import qdpmc.structures as structures
-import qdpmc.tools.payoffs as pay
+import pyoptmc.structures as structures
+import pyoptmc.tools.payoffs as pay
 from functools import partial
-from qdpmc.tools.helper import arr_scalar_converter
-from qdpmc.dateutil import Calendar
+from pyoptmc.tools.helper import arr_scalar_converter
+from pyoptmc.dateutil import Calendar
 from scipy.optimize import fsolve
 from numpy import array, any, argmax
 
@@ -238,7 +238,7 @@ class SnowballProd:
     def value(self, valuation_date, spot, ki_flag, *args, **kwargs):
         """Value the product given a date and a spot price. *args* and *kwargs*
         are positional and keyword arguments forwarded to
-        :meth:`qdpmc.engine.monte_carlo.MonteCarlo.calc`
+        :meth:`pyoptmc.engine.monte_carlo.MonteCarlo.calc`
 
         Parameters
         ----------
@@ -258,7 +258,7 @@ class SnowballProd:
         """Give a target PV, find the coupon rate.
 
         *entropy* and *caller* are forwarded to
-        :meth:`qdpmc.engine.monte_carlo.MonteCarlo.calc`
+        :meth:`pyoptmc.engine.monte_carlo.MonteCarlo.calc`
         """
         e = entropy
 

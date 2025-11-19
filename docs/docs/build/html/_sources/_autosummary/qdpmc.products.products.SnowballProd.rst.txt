@@ -1,7 +1,7 @@
-﻿qdpmc.products.products.SnowballProd
+﻿pyoptmc.products.products.SnowballProd
 ====================================
 
-.. currentmodule:: qdpmc.products.products
+.. currentmodule:: pyoptmc.products.products
 
 .. autoclass:: SnowballProd
    :members:

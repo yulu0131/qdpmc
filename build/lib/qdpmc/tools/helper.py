@@ -1,5 +1,5 @@
 import numpy as np
-from qdpmc.tools.payoffs import Payoff
+from pyoptmc.tools.payoffs import Payoff
 
 
 def double_ko_t_and_surviving_paths(paths, u, d, return_idx):

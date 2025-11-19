@@ -13,13 +13,13 @@ if missing_dependencies:
     )
 
 
-__version__ = "0.13.1a"
+__version__ = "0.14.1b"
 
 del dependencies, dependency, missing_dependencies
 
-from qdpmc.engine import *
-from qdpmc.model import *
-from qdpmc.tools import *
-from qdpmc.structures import *
-from qdpmc.dateutil import Calendar
-from qdpmc.products.products import SnowballProd
+from pyoptmc.engine import *
+from pyoptmc.model import *
+from pyoptmc.tools import *
+from pyoptmc.structures import *
+from pyoptmc.dateutil import Calendar
+from pyoptmc.products.products import PhoenixProd

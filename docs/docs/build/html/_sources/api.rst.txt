@@ -9,30 +9,30 @@ Structures
     :template: autogen_class_methods.rst
     :recursive:
 
-    ~qdpmc.structures.barrier_options.UpOut
-    ~qdpmc.structures.barrier_options.UpIn
-    ~qdpmc.structures.barrier_options.DownOut
-    ~qdpmc.structures.barrier_options.DownIn
-    ~qdpmc.structures.barrier_options.DoubleOut
-    ~qdpmc.structures.barrier_options.DoubleIn
-    ~qdpmc.structures.autocalls.StandardSnowball
-    ~qdpmc.structures.autocalls.UpOutDownIn
+    ~pyoptmc.structures.barrier_options.UpOut
+    ~pyoptmc.structures.barrier_options.UpIn
+    ~pyoptmc.structures.barrier_options.DownOut
+    ~pyoptmc.structures.barrier_options.DownIn
+    ~pyoptmc.structures.barrier_options.DoubleOut
+    ~pyoptmc.structures.barrier_options.DoubleIn
+    ~pyoptmc.structures.autocalls.StandardSnowball
+    ~pyoptmc.structures.autocalls.UpOutDownIn
 
 Payoffs
 -------
 .. autosummary::
     :toctree: _autosummary
 
-    ~qdpmc.tools.payoffs.plain_vanilla
-    ~qdpmc.tools.payoffs.cash_or_nothing
-    ~qdpmc.tools.payoffs.asset_or_nothing
+    ~pyoptmc.tools.payoffs.plain_vanilla
+    ~pyoptmc.tools.payoffs.cash_or_nothing
+    ~pyoptmc.tools.payoffs.asset_or_nothing
 
 .. autosummary::
     :toctree: _autosummary
     :template: autogen_class_methods.rst
     :recursive:
 
-    ~qdpmc.tools.payoffs.Payoff
+    ~pyoptmc.tools.payoffs.Payoff
 
 Products
 --------
@@ -42,7 +42,7 @@ Products
     :template: autogen_class_methods.rst
     :recursive:
 
-    ~qdpmc.products.products.SnowballProd
+    ~pyoptmc.products.products.SnowballProd
 
 Market Models
 -------------
@@ -52,8 +52,8 @@ Market Models
     :template: autogen_class_methods.rst
     :recursive:
 
-    ~qdpmc.model.market_process.BlackScholes
-    ~qdpmc.model.market_process.Heston
+    ~pyoptmc.model.market_process.BlackScholes
+    ~pyoptmc.model.market_process.Heston
 
 
 Engines
@@ -64,7 +64,7 @@ Engines
     :template: autogen_class_methods.rst
     :recursive:
 
-    ~qdpmc.engine.monte_carlo.MonteCarlo
+    ~pyoptmc.engine.monte_carlo.MonteCarlo
 
 Date Utilities
 --------------
@@ -74,4 +74,4 @@ Date Utilities
     :template: autogen_class_methods.rst
     :recursive:
 
-    ~qdpmc.dateutil.date.Calendar
+    ~pyoptmc.dateutil.date.Calendar

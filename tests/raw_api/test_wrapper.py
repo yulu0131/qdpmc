@@ -1,9 +1,9 @@
 import numpy as np
 
-from qdpmc.products import *
-from qdpmc.dateutil.date import Calendar
-from qdpmc import MonteCarlo, BlackScholes
-from qdpmc import Payoff, plain_vanilla
+from pyoptmc.products import *
+from pyoptmc.dateutil.date import Calendar
+from pyoptmc import MonteCarlo, BlackScholes
+from pyoptmc import Payoff, plain_vanilla
 from unittest import TestCase
 import datetime
 
@@ -37,7 +37,7 @@ class test(TestCase):
             value1(datetime.date(2019, 5, 1))
 
     def test_ki(self):
-        from qdpmc.structures import (
+        from pyoptmc.structures import (
             UpOut as UO,
             UpOutDownIn as UODI,
         )

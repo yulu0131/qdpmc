@@ -1,7 +1,7 @@
-﻿qdpmc.dateutil.date.Calendar
+﻿pyoptmc.dateutil.date.Calendar
 ============================
 
-.. currentmodule:: qdpmc.dateutil.date
+.. currentmodule:: pyoptmc.dateutil.date
 
 .. autoclass:: Calendar
    :members:

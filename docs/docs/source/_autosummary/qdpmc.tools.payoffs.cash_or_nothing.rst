@@ -1,6 +1,6 @@
-﻿qdpmc.tools.payoffs.cash\_or\_nothing
+﻿pyoptmc.tools.payoffs.cash\_or\_nothing
 =====================================
 
-.. currentmodule:: qdpmc.tools.payoffs
+.. currentmodule:: pyoptmc.tools.payoffs
 
 .. autofunction:: cash_or_nothing

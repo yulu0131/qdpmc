@@ -1,7 +1,7 @@
-﻿qdpmc.structures.barrier\_options.DoubleIn
+﻿pyoptmc.structures.barrier\_options.DoubleIn
 ==========================================
 
-.. currentmodule:: qdpmc.structures.barrier_options
+.. currentmodule:: pyoptmc.structures.barrier_options
 
 .. autoclass:: DoubleIn
    :members:

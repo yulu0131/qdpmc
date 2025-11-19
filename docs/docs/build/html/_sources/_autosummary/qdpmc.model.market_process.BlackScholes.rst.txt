@@ -1,7 +1,7 @@
-﻿qdpmc.model.market\_process.BlackScholes
+﻿pyoptmc.model.market\_process.BlackScholes
 ========================================
 
-.. currentmodule:: qdpmc.model.market_process
+.. currentmodule:: pyoptmc.model.market_process
 
 .. autoclass:: BlackScholes
    :members:

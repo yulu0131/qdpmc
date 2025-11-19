@@ -1,7 +1,7 @@
-﻿qdpmc.structures.autocalls.StandardSnowball
+﻿pyoptmc.structures.autocalls.StandardSnowball
 ===========================================
 
-.. currentmodule:: qdpmc.structures.autocalls
+.. currentmodule:: pyoptmc.structures.autocalls
 
 .. autoclass:: StandardSnowball
    :members:

@@ -1,7 +1,7 @@
-﻿qdpmc.tools.payoffs.Payoff
+﻿pyoptmc.tools.payoffs.Payoff
 ==========================
 
-.. currentmodule:: qdpmc.tools.payoffs
+.. currentmodule:: pyoptmc.tools.payoffs
 
 .. autoclass:: Payoff
    :members:

@@ -1,4 +1,4 @@
-.. qdpmc documentation master file, created by
+.. pyoptmc documentation master file, created by
    sphinx-quickstart on Mon Jul 19 10:30:20 2021.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
@@ -10,7 +10,7 @@
 
    Feedback and questions: dev@yieldchain.com
 
-``qdpmc`` is a Python package for pricing path-dependent options
+``pyoptmc`` is a Python package for pricing path-dependent options
 and structured products via Monte Carlo simulation. It utilizes
 *vectorization* to boost algorithm speed. It offers a *simple*, *intuitive* ,
 and *flexible* API to its users. This simple example demonstrates how it works:
@@ -18,7 +18,7 @@ and *flexible* API to its users. This simple example demonstrates how it works:
 
 .. ipython:: python
 
-   import qdpmc as qm
+   import pyoptmc as qm
 
    import numpy as np
 

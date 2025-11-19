@@ -1,4 +1,4 @@
-from qdpmc import *
+from pyoptmc import *
 import yuanrong
 
 

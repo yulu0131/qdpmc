@@ -8,15 +8,15 @@
 # Todo: We should remove parameter *rebate* in SingleBarrier
 #       and capture it with a path-dependent payoff class
 
-from qdpmc.tools.helper import (
+from pyoptmc.tools.helper import (
     arr_scalar_converter,
     up_ko_t_and_surviving_paths,
     down_ko_t_and_surviving_paths,
     fill_arr
 )
-from qdpmc.tools.payoffs import Payoff
+from pyoptmc.tools.payoffs import Payoff
 from numpy import log
-from qdpmc._decorators import _param_freezer
+from pyoptmc._decorators import _param_freezer
 
 
 class SingleBarrier:

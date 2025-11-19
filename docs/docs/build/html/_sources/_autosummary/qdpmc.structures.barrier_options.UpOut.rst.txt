@@ -1,7 +1,7 @@
-﻿qdpmc.structures.barrier\_options.UpOut
+﻿pyoptmc.structures.barrier\_options.UpOut
 =======================================
 
-.. currentmodule:: qdpmc.structures.barrier_options
+.. currentmodule:: pyoptmc.structures.barrier_options
 
 .. autoclass:: UpOut
    :members:

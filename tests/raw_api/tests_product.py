@@ -1,9 +1,9 @@
-from qdpmc import *
+from pyoptmc import *
 import numpy as np
 import unittest
-from qdpmc.tools.payoffs import Payoff
-from qdpmc.structures.creator.creator import SingleBarrier
-from qdpmc.model.market_process import Heston
+from pyoptmc.tools.payoffs import Payoff
+from pyoptmc.structures.creator.creator import SingleBarrier
+from pyoptmc.model.market_process import Heston
 
 
 # General parameters

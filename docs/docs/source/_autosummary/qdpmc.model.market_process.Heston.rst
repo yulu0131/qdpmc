@@ -1,7 +1,7 @@
-﻿qdpmc.model.market\_process.Heston
+﻿pyoptmc.model.market\_process.Heston
 ==================================
 
-.. currentmodule:: qdpmc.model.market_process
+.. currentmodule:: pyoptmc.model.market_process
 
 .. autoclass:: Heston
    :members:

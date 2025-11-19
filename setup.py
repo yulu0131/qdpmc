@@ -9,7 +9,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="QdpMC",
+    name="pyoptmc",
     description='A package for pricing OTC options using a vectorized Monte Carlo method.',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -19,9 +19,9 @@ setup(
     ],
     keywords='derivatives, finance',
     license='Free for non-commercial use',
-    author='YieldChain Developers',
-    author_email='dev@yieldchain.com',
-    url='http://www.yieldchain.com/qdpmc/',
+    author='Yu Lu',
+    author_email='luyudso@gmail.com',
+    url='',
     package_dir={'': 'src'},
     packages=find_packages(where='src'),
     python_requires='>=3.8',

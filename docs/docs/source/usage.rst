@@ -10,11 +10,11 @@ pricing path-dependent options. For detailed documentation, refer to
 Installation
 ------------
 
-To obtain the latest version of ``qdpmc``, use pip:
+To obtain the latest version of ``pyoptmc``, use pip:
 
 .. code-block:: bash
 
-    pip install qdpmc
+    pip install pyoptmc
 
 .. _simple_examples:
 
@@ -26,7 +26,7 @@ Import modules
 
 .. ipython:: python
 
-    import qdpmc as qm
+    import pyoptmc as qm
     import numpy as np
 
 Set up parameters
@@ -45,7 +45,7 @@ simulation and market dynamics.
 Single-barrier options
 ^^^^^^^^^^^^^^^^^^^^^^
 This example in the index page demonstrates the
-pricing of an up-and-out call option using ``qdpmc``.
+pricing of an up-and-out call option using ``pyoptmc``.
 To price an up-and-out put option, modify the associated codes:
 
 .. ipython:: python

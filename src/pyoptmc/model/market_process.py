@@ -5,7 +5,7 @@ Currently, supported market models are
 * Black-Scholes market model
 """
 import numpy as np
-from qdpmc.structures.base import ProcessCoordinator, OptionABC
+from pyoptmc.structures.base import ProcessCoordinator, OptionABC
 import math
 from scipy.stats import norm
 from numba import float64

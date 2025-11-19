@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from qdpmc.structures._docs import (
+from pyoptmc.structures._docs import (
     _calc_value_docs,
     _spot_docs,
     _sim_t_array_docs
 )
-from qdpmc._decorators import DocstringWriter
+from pyoptmc._decorators import DocstringWriter
 
 
 class OptionABC(ABC):

@@ -1,7 +1,7 @@
-﻿qdpmc.structures.barrier\_options.DoubleOut
+﻿pyoptmc.structures.barrier\_options.DoubleOut
 ===========================================
 
-.. currentmodule:: qdpmc.structures.barrier_options
+.. currentmodule:: pyoptmc.structures.barrier_options
 
 .. autoclass:: DoubleOut
    :members:

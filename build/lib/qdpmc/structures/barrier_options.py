@@ -22,7 +22,7 @@ Monte Carlo pricing of barrier options because it allows for
 
 
 import numpy as np
-from qdpmc.tools.helper import (
+from pyoptmc.tools.helper import (
     arr_scalar_converter,
     up_ki_paths,
     down_ki_paths,
@@ -33,14 +33,14 @@ from qdpmc.tools.helper import (
     merge_days,
     fill_arr
 )
-from qdpmc.structures.base import StructureMC
-from qdpmc.structures._docs import (
+from pyoptmc.structures.base import StructureMC
+from pyoptmc.structures._docs import (
     _single_barrier_out_param_docs,
     _single_barrier_in_param_docs,
     _pv_log_paths_docs,
     _payoff_docs,
 )
-from qdpmc._decorators import DocstringWriter
+from pyoptmc._decorators import DocstringWriter
 
 
 __all__ = ['SingleBarrierOption', 'UpOut', 'UpIn', 'DownOut', 'DownIn',

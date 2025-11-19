@@ -50,7 +50,7 @@ _calc_value_docs = """Calculates the present value and Greeks of the option.
         Market process.
     args, kwargs :
         Forwarded to %(calc)s""" % \
-                   {'calc': ':meth:`qdpmc.engine.monte_carlo.MonteCarlo.calc`'}
+                   {'calc': ':meth:`pyoptmc.engine.monte_carlo.MonteCarlo.calc`'}
 
 ###
 _pv_log_paths_docs = """Calculate the present value given a set of paths

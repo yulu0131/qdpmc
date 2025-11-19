@@ -1,5 +1,5 @@
 import numpy as np
-from qdpmc.structures.base import StructureMC
+from pyoptmc.structures.base import StructureMC
 
 
 class FixedStrike(StructureMC):

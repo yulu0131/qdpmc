@@ -16,7 +16,7 @@ Monte Carlo pricing of barrier options. It allows for
 """
 
 import numpy as np
-from qdpmc.tools.helper import (
+from pyoptmc.tools.helper import (
     up_ko_t_and_surviving_paths,
     down_ki_paths,
     arr_scalar_converter,
@@ -25,10 +25,10 @@ from qdpmc.tools.helper import (
     check_ko_path,
     check_up_settle_idx
 )
-from qdpmc.tools.payoffs import plain_vanilla
-from qdpmc.structures.base import StructureMC
-from qdpmc.structures._docs import _pv_log_paths_docs
-from qdpmc._decorators import DocstringWriter
+from pyoptmc.tools.payoffs import plain_vanilla
+from pyoptmc.structures.base import StructureMC
+from pyoptmc.structures._docs import _pv_log_paths_docs
+from pyoptmc._decorators import DocstringWriter
 
 __all__ = ['StandardPhoenix', 'StandardSnowball', 'UpOutDownIn', 'StandardPhoenix']
 
@@ -274,12 +274,12 @@ class UpOutDownIn(StructureMC):
 
 
 if __name__ == "__main__":
-    from qdpmc import *
+    from pyoptmc import *
     import datetime
-    from qdpmc.products import PhoenixProd
-    from qdpmc.dateutil.date import Calendar
-    from qdpmc import MonteCarlo, BlackScholes
-    from qdpmc import Payoff
+    from pyoptmc.products import PhoenixProd
+    from pyoptmc.dateutil.date import Calendar
+    from pyoptmc import MonteCarlo, BlackScholes
+    from pyoptmc import Payoff
 
     calendar = Calendar()
 

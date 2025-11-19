@@ -1,7 +1,7 @@
-﻿qdpmc.structures.autocalls.UpOutDownIn
+﻿pyoptmc.structures.autocalls.UpOutDownIn
 ======================================
 
-.. currentmodule:: qdpmc.structures.autocalls
+.. currentmodule:: pyoptmc.structures.autocalls
 
 .. autoclass:: UpOutDownIn
    :members:

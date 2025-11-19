@@ -1,7 +1,7 @@
-﻿qdpmc.engine.monte\_carlo.MonteCarlo
+﻿pyoptmc.engine.monte\_carlo.MonteCarlo
 ====================================
 
-.. currentmodule:: qdpmc.engine.monte_carlo
+.. currentmodule:: pyoptmc.engine.monte_carlo
 
 .. autoclass:: MonteCarlo
    :members:

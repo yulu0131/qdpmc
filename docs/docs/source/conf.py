@@ -12,14 +12,14 @@
 #
 import os
 import sys
-from qdpmc import __version__ as v
+from pyoptmc import __version__ as v
 sys.path.insert(0, os.path.abspath('.'))
-sys.path.insert(0, os.path.abspath('../../../qdpmc/src/'))
+sys.path.insert(0, os.path.abspath('../../../pyoptmc/src/'))
 from numpydoc.xref import DEFAULT_LINKS
 
 # -- Project information -----------------------------------------------------
 
-project = 'QdpMC'
+project = 'pyoptmc'
 copyright = '2021, Yield Chain Technology Co., Ltd.'
 author = 'YC'
 
@@ -75,7 +75,7 @@ html_static_path = ['_static']
 
 # IPython configuration options
 ipython_execlines = [
-    'import qdpmc as qm',
+    'import pyoptmc as qm',
     'import numpy as np',
     'import datetime'
 ]
@@ -93,11 +93,11 @@ napoleon_preprocess_types = True
 napoleon_include_init_with_doc = False  # move init doc to 'class' doc
 napoleon_type_aliases = DEFAULT_LINKS.copy()
 napoleon_type_aliases.update(
-    {'Payoff': ':class:`qdpmc.tools.payoffs.Payoff`',
-     'Engine': ':class:`qdpmc.engine.monte_carlo.MonteCarlo`',
-     'Heston': ':class:`qdpmc.model.market_process.Heston`',
-     'BlackScholes': ':class:`qdpmc.model.market_process.BlackScholes`',
-     'Calendar': ':class:`qdpmc.dateutil.date.Calendar`'
+    {'Payoff': ':class:`pyoptmc.tools.payoffs.Payoff`',
+     'Engine': ':class:`pyoptmc.engine.monte_carlo.MonteCarlo`',
+     'Heston': ':class:`pyoptmc.model.market_process.Heston`',
+     'BlackScholes': ':class:`pyoptmc.model.market_process.BlackScholes`',
+     'Calendar': ':class:`pyoptmc.dateutil.date.Calendar`'
      }
 )
 

@@ -1,8 +1,7 @@
 import numpy as np
 from tqdm import tqdm
-from tqdm_joblib import tqdm_joblib
-from qdpmc.structures.base import StructureMC
-from qdpmc.model.market_process import BlackScholes
+from pyoptmc.structures.base import StructureMC
+from pyoptmc.model.market_process import BlackScholes
 from joblib import Parallel, delayed
 from joblib import wrap_non_picklable_objects
 from multiprocessing import cpu_count

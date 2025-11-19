@@ -1,7 +1,7 @@
 # Todo: test Calendar.add_holidays and Calendar.add_holiday_rule
 
 import datetime
-from qdpmc.dateutil._china_holidays import _is_china_holidays
+from pyoptmc.dateutil._china_holidays import _is_china_holidays
 
 __all__ = ['Calendar', 'CHINA_HOLIDAYS']
 

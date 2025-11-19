@@ -1,6 +1,6 @@
-﻿qdpmc.tools.payoffs.plain\_vanilla
+﻿pyoptmc.tools.payoffs.plain\_vanilla
 ==================================
 
-.. currentmodule:: qdpmc.tools.payoffs
+.. currentmodule:: pyoptmc.tools.payoffs
 
 .. autofunction:: plain_vanilla
