@@ -159,6 +159,7 @@ def _is_china_holidays(date: datetime.date):
         or (y == 2026 and d == 6 and m == 4)
         or (y == 2026 and 1 <= d <= 5 and m == 5)
         or (y == 2026 and d == 19 and m == 6)
+        or (y == 2026 and d == 25 and m == 9)
         or (y == 2026 and 1 <= d <= 7 and m == 10)
 
     )
