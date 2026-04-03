@@ -1,6 +1,6 @@
 import numpy as np
 from pyoptmc.tools.payoffs import Payoff
-
+from pyoptmc.tools.enum import QuantityCalcType
 
 def double_ko_t_and_surviving_paths(paths, u, d, return_idx):
     """Given a set of projections of prices, find out the ones that
@@ -133,6 +133,34 @@ def up_ko_t_and_surviving_paths(paths, barrier, return_idx):
     nko_paths = paths[nko_idx]
     return ko_t, ko_paths, nko_paths
 
+def double_ko_and_surviving_paths(paths, up_barrier, down_barrier, return_idx):
+    up_hit = paths >= up_barrier
+    down_hit = paths <= down_barrier
+    up_hit_any = np.any(up_hit, axis=1)
+    down_hit_any = np.any(down_hit, axis=1)
+
+    up_t = np.where(up_hit_any, np.argmax(up_hit, axis=1), np.inf)
+    down_t = np.where(down_hit_any, np.argmax(down_hit, axis=1), np.inf)
+
+    ko_idx = up_hit_any & (up_t < down_t)
+    ki_idx = down_hit_any & (down_t < up_t)
+    survive_idx = ~(ko_idx | ki_idx)
+
+    ko_t = up_t
+    ki_t = down_t
+
+    if return_idx:
+        return ko_t, ki_t, ko_idx, ki_idx, survive_idx
+
+    return (
+        ko_t[ko_idx],
+        ki_t[ki_idx],
+        paths[ko_idx],
+        paths[ki_idx],
+        paths[survive_idx]
+    )
+
+
 def check_up_settle_idx(paths, settle_barrier,
                         return_idx):
     settle_path_idx = np.any(paths >= settle_barrier, axis=1)
@@ -164,3 +192,61 @@ def fill_arr(arr, ob_days, all_days, val_with):
     # set the full array's elements to barrier
     filled[pos_ob_days] = arr
     return filled
+
+
+def cash(underlying_price, cash_amount):
+    payoff = np.full(len(underlying_price), float(cash_amount))
+    return payoff
+
+def _zero():
+    return lambda s: cash(s, 0.0)
+
+
+def _scale(f, scalar):
+    return lambda s: scalar * f(s)
+
+
+def _add(f, g):
+    return lambda s: f(s) + g(s)
+
+
+class PayoffWrapper:
+    def __init__(self, ob_days: np.array,
+                 payoff_func, calc_type: QuantityCalcType):
+        self.payoff_func = payoff_func
+        self.calc_type = calc_type
+        self.ob_days = ob_days
+        self.update_payoffs = self._update()
+
+    def _update(self):
+        zero = _zero()
+        n = len(self.ob_days)
+
+        if self.calc_type == QuantityCalcType.FULL:
+            total = _scale(self.payoff_func, n)
+            return [total for _ in range(n)]
+
+        elif self.calc_type == QuantityCalcType.NONE:
+            return [zero for _ in range(n)]
+
+        elif self.calc_type == QuantityCalcType.REMAINING_EXCLUDE_TERMINATE:
+            sum_payoffs = [zero for _ in range(n)]
+            running = zero
+            for i in range(n - 1, 0, -1):
+                running = _add(running, self.payoff_func)
+                sum_payoffs[i - 1] = running
+
+            return sum_payoffs
+
+        elif self.calc_type == QuantityCalcType.REMAINING_INCLUDE_TERMINATE:
+            sum_payoffs = [zero for _ in range(n)]
+            running = zero
+            for i in range(n - 1, -1, -1):
+                running = _add(running, self.payoff_func)
+                sum_payoffs[i] = running
+            return sum_payoffs
+        else:
+            raise ValueError("Invalid QuantityCalcType!")
+
+    def get_payoff_vec(self):
+        return self.update_payoffs

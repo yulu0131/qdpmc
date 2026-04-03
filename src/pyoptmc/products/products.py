@@ -4,12 +4,16 @@ import numpy as np
 import pyoptmc.structures as structures
 import pyoptmc.tools.payoffs as pay
 from functools import partial
+from pyoptmc.tools.payoffs import plain_vanilla, cash, cash_or_nothing
 from pyoptmc.tools.helper import arr_scalar_converter
+from pyoptmc.tools.enum import AccumulatorType, QuantityCalcType, PayoffType, SettlementType
 from pyoptmc.dateutil import Calendar
 from scipy.optimize import fsolve
 from numpy import array, any, argmax
+from typing import List
 
-__all__ = ['SnowballProd', 'PhoenixProd']
+__all__ = ['PhoenixAccumulatorProd',
+    'SnowballProd', 'PhoenixProd', 'PhoenixAccumulatorProd']
 
 
 def _interval_coupon(
@@ -82,10 +86,168 @@ def _check_calendar(calendar):
         raise TypeError("calendar must be Calendar object")
     return calendar
 
-# class Product(ABC):
+
+# accumulator requires payoff wrapper...
+def _update_hit_payoff(payoff_type, value, multiple, option_type):
+    def payoff(s):
+        payoff_val = 0.0
+        if payoff_type == PayoffType.FIX:
+            payoff_val = cash(s, value * multiple)
+        elif payoff_type == PayoffType.FLOAT:
+            payoff_val =  multiple * plain_vanilla(s, value, option_type)
+        elif payoff_type == PayoffType.NONE:
+            payoff_val = cash(s, 0.0)
+        else:
+            raise ValueError("Unknown payoff type: {}".format(payoff_type))
+        return payoff_val
+    return payoff
+
+
+
+class PhoenixAccumulatorProd:
+    def __init__(self,
+                 start_date,
+                 ob_dates,
+                 initial_price,
+                 accumulator_type: AccumulatorType,
+                 ko_barrier: float,
+                 ko_calc_type: QuantityCalcType,
+                 ko_payoff_type: PayoffType,
+                 ko_value: float,
+                 ko_multiple: float,
+                 ki_barrier: float,
+                 ki_calc_type: QuantityCalcType,
+                 ki_payoff_type: PayoffType,
+                 ki_value: float,
+                 ki_multiple: float,
+                 unhit_payoff_type: PayoffType,
+                 unhit_value: float,
+                 unhit_multiple: float,
+                 cal: Calendar = None
+                 ):
+        _inputs = locals()
+        _inputs.pop("self")
+        self._inputs = _inputs
+        self._acc_type = accumulator_type
+        if cal is None:
+            cal = Calendar()
+        self.start_date = _check_is_trading(start_date, cal)
+        ob_dates = _check_ob_dates(ob_dates, cal)
+        self.ob_days = cal.to_scalar(ob_dates, self.start_date)
+        self.ko_barrier = ko_barrier
+        self.ki_barrier = ki_barrier
+        self.calendar = cal
+        self.ko_value = ko_value
+        self.ki_value = ki_value
+        self.unhit_payoff_type = unhit_payoff_type
+        self.unhit_value = unhit_value
+        self.unhit_multiple = unhit_multiple
+        self.ko_calc_type = ko_calc_type
+        self.ki_calc_type = ki_calc_type
+        ko_option_type = "call"
+        ki_option_type = "put"
+        if accumulator_type == AccumulatorType.Deccumulator:
+            ko_option_type = "put"
+            ki_option_type = "call"
+        self.unhit_option_type = ko_option_type
+        self.unhit_payoff = self._update_unhit_payoff()
+        self.ko_payoff = _update_hit_payoff(ko_payoff_type, ko_value, ko_multiple, ko_option_type)
+        self.ki_payoff = _update_hit_payoff(ki_payoff_type, ki_value, -ki_multiple, ki_option_type)
+
+    def _update_unhit_payoff(self):
+        if self.unhit_payoff_type == PayoffType.FLOAT:
+            def payoff(s):
+                if self._acc_type == AccumulatorType.Accumulator:
+                    cash_amount = self.unhit_multiple * (self.ko_value - self.unhit_value)
+                    c2 = self.unhit_multiple * (self.ki_value - self.unhit_value)
+                else:
+                    cash_amount = self.unhit_multiple * (self.unhit_value - self.ko_value)
+                    c2 = self.unhit_multiple * (self.unhit_value - self.ki_value)
+                payoff_val = (
+                        self.unhit_multiple * plain_vanilla(s, self.unhit_value, self.unhit_option_type)
+                        - self.unhit_multiple * plain_vanilla(s, self.ko_barrier, self.unhit_option_type)
+                        - cash_or_nothing(s, self.ko_barrier, cash_amount, self.unhit_option_type)
+                )
+
+                if self._acc_type == AccumulatorType.Accumulator:
+                    if self.unhit_value < self.ki_barrier:
+                        payoff_val += cash_or_nothing(s, self.ki_barrier, c2, self.unhit_option_type)
+                else:
+                    if self.unhit_value > self.ki_barrier:
+                        payoff_val += cash_or_nothing(s, self.ki_barrier, c2, self.unhit_option_type)
+
+                return payoff_val
+            return payoff
+
+        elif self.unhit_payoff_type == PayoffType.FIX:
+            def payoff(s):
+                coupon = self.unhit_value * self.unhit_multiple
+                payoff_val = cash_or_nothing(
+                    s, self.ki_barrier, coupon, self.unhit_option_type) - \
+                    cash_or_nothing(s, self.ko_barrier, coupon, self.unhit_option_type)
+                return payoff_val
+            return payoff
+        elif self.unhit_payoff_type == PayoffType.NONE:
+            def payoff(s):
+                return cash(s, 0.0)
+            return payoff
+        else:
+            raise ValueError("Unknown Unhit PayoffType")
+
+    def to_structure(self, valuation_date, spot):
+        valuation_date = _check_is_trading(valuation_date, self.calendar)
+        td = self.calendar.num_trading_days_between(
+            start=self.start_date, end=valuation_date, count_end=True
+        )
+        ob_days = _update_day_arr(self.ob_days, td)
+        ob_days = np.array(ob_days[0])
+        obj = None
+        if self._acc_type == AccumulatorType.Accumulator:
+            obj = structures.DoubleBarrierAccumulator(spot, SettlementType.AT_OBSERVATION,
+                                                    self.ko_calc_type, self.ko_barrier, self.ko_payoff,
+                                                    self.ki_calc_type, self.ki_barrier, self.ki_payoff,
+                                                    self.unhit_payoff, ob_days)
+
+        else:
+            obj = structures.DoubleBarrierAccumulator(spot, SettlementType.AT_OBSERVATION,
+                                                   self.ki_calc_type, self.ki_barrier, self.ki_payoff,
+                                                   self.ko_calc_type, self.ko_barrier, self.ko_payoff,
+                                                   self.unhit_payoff, ob_days)
+        return obj
+
+    def value(self, valuation_date, spot, cal_beginning=False, *args, **kwargs):
+        structure =  self.to_structure(valuation_date, spot)
+        if cal_beginning:
+            structure.update_sim_array()
+        return structure.calc_value(
+            *args, **kwargs)
+
+    def single_call(self, valuation_date, spot, cal_beginning=False, *args, **kwargs):
+        structure =  self.to_structure(valuation_date, spot)
+        if cal_beginning:
+            structure.update_sim_array()
+        return structure.calc_single_batch( *args, **kwargs)
+# class KnockInAccumulatorProd:
 #     def __init__(self):
 #         pass
-
+#
+#     def to_structure(self, valuation_date, spot):
+#         pass
+#
+#     def value(self, valuation_date, spot, *args, **kwargs):
+#         return self.to_structure(valuation_date, spot).calc_value(
+#             *args, **kwargs)
+#
+# class KnockOutAccumulatorProd:
+#     def __init__(self):
+#         pass
+#
+#     def to_structure(self, valuation_date, spot):
+#         pass
+#
+#     def value(self, valuation_date, spot, *args, **kwargs):
+#         return self.to_structure(valuation_date, spot).calc_value(
+#             *args, **kwargs)
 
 class PhoenixProd:
     def __init__(

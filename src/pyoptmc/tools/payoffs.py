@@ -2,6 +2,8 @@
 # Todo: add documentation to Payoff
 
 import numpy as np
+from typing import List
+from pyoptmc.tools.enum import QuantityCalcType
 
 
 def plain_vanilla(underlying_price, strike, option_type='call'):
@@ -31,7 +33,7 @@ def plain_vanilla(underlying_price, strike, option_type='call'):
         )
 
 
-def cash_or_nothing(underlying_price, strike, cash_amount):
+def cash_or_nothing(underlying_price, strike, cash_amount, option_type='call'):
     """A cash-or-nothing payoff function.
 
     Parameters
@@ -48,9 +50,19 @@ def cash_or_nothing(underlying_price, strike, cash_amount):
     ndarray
         The payoff array."""
     payoff = np.full(len(underlying_price), float(cash_amount))
-    payoff[underlying_price <= strike] = 0
+    if option_type == 'call':
+        payoff[underlying_price <= strike] = 0
+    elif option_type == 'put':
+        payoff[underlying_price >= strike] = 0
+    else:
+        raise ValueError(
+            "Option type should be 'call' or 'put', got %s" % option_type
+        )
     return payoff
 
+def cash(underlying_price, cash_amount):
+    payoff = np.full(len(underlying_price), float(cash_amount))
+    return payoff
 
 def asset_or_nothing(underlying_price, strike):
     """An asset-or-nothing payoff function

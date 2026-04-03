@@ -1,6 +1,7 @@
 # Todo: test Calendar.add_holidays and Calendar.add_holiday_rule
 
 import datetime
+from typing import List
 from pyoptmc.dateutil._china_holidays import _is_china_holidays
 
 __all__ = ['Calendar', 'CHINA_HOLIDAYS']
@@ -87,7 +88,7 @@ class Calendar:
             start: datetime.date,
             end: datetime.date,
             endpoints: bool = True
-    ) -> list:
+    ) -> List[float]:
         """Return a list of trading days between *start* and *end*. Endpoints
         are counted only if they are trading.
 
@@ -231,7 +232,7 @@ class Calendar:
 
         return res
 
-    def to_scalar(self, date_arr, start) -> list:
+    def to_scalar(self, date_arr, start) -> List[float]:
         """Convert dates into integers given a start date.
 
         Parameters
@@ -253,7 +254,7 @@ class Calendar:
             start: datetime.date,
             end: datetime.date,
             count_end: bool = True
-    ) -> int:
+    ) -> float:
         """Return number of trading days between two dates. If these dates
         are identical, return 0. *count_end* controls whether to count the
         end date."""

@@ -22,4 +22,4 @@ from pyoptmc.model import *
 from pyoptmc.tools import *
 from pyoptmc.structures import *
 from pyoptmc.dateutil import Calendar
-from pyoptmc.products.products import PhoenixProd
+from pyoptmc.products.products import PhoenixProd, PhoenixAccumulatorProd

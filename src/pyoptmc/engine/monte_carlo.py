@@ -207,8 +207,10 @@ class MonteCarlo:
             self, option: StructureMC, process: BlackScholes,
             request_greeks=False
     ):
+        seed = np.random.SeedSequence(None)
+
         return _run_one_time_caller(
             batch_size=self.batch_size, option=option,
             process=process,
             request_greeks=request_greeks
-        )
+        )(seed)
