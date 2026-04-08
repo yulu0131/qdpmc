@@ -158,11 +158,11 @@ class PhoenixAccumulatorProd:
         if self.unhit_payoff_type == PayoffType.FLOAT:
             def payoff(s):
                 if self._acc_type == AccumulatorType.Accumulator:
-                    cash_amount = self.unhit_multiple * (self.ko_value - self.unhit_value)
-                    c2 = self.unhit_multiple * (self.ki_value - self.unhit_value)
+                    cash_amount = self.unhit_multiple * (self.ko_barrier - self.unhit_value)
+                    c2 = self.unhit_multiple * (self.ki_barrier - self.unhit_value)
                 else:
-                    cash_amount = self.unhit_multiple * (self.unhit_value - self.ko_value)
-                    c2 = self.unhit_multiple * (self.unhit_value - self.ki_value)
+                    cash_amount = self.unhit_multiple * (self.unhit_value - self.ko_barrier)
+                    c2 = self.unhit_multiple * (self.unhit_value - self.ki_barrier)
                 payoff_val = (
                         self.unhit_multiple * plain_vanilla(s, self.unhit_value, self.unhit_option_type)
                         - self.unhit_multiple * plain_vanilla(s, self.ko_barrier, self.unhit_option_type)

@@ -13,7 +13,7 @@ if missing_dependencies:
     )
 
 
-__version__ = "0.14.2"
+__version__ = "0.14.4"
 
 del dependencies, dependency, missing_dependencies
 
