@@ -227,27 +227,30 @@ class PhoenixAccumulatorProd:
         if cal_beginning:
             structure.update_sim_array()
         return structure.calc_single_batch( *args, **kwargs)
-# class KnockInAccumulatorProd:
-#     def __init__(self):
-#         pass
-#
-#     def to_structure(self, valuation_date, spot):
-#         pass
-#
-#     def value(self, valuation_date, spot, *args, **kwargs):
-#         return self.to_structure(valuation_date, spot).calc_value(
-#             *args, **kwargs)
-#
-# class KnockOutAccumulatorProd:
-#     def __init__(self):
-#         pass
-#
-#     def to_structure(self, valuation_date, spot):
-#         pass
-#
-#     def value(self, valuation_date, spot, *args, **kwargs):
-#         return self.to_structure(valuation_date, spot).calc_value(
-#             *args, **kwargs)
+
+class KnockInAccumulatorProd:
+    def __init__(self,
+                 start_date,
+                 ob_dates):
+        pass
+
+    def to_structure(self, valuation_date, spot):
+        pass
+
+    def value(self, valuation_date, spot, *args, **kwargs):
+        return self.to_structure(valuation_date, spot).calc_value(
+            *args, **kwargs)
+
+class KnockOutAccumulatorProd:
+    def __init__(self):
+        pass
+
+    def to_structure(self, valuation_date, spot):
+        pass
+
+    def value(self, valuation_date, spot, *args, **kwargs):
+        return self.to_structure(valuation_date, spot).calc_value(
+            *args, **kwargs)
 
 class PhoenixProd:
     def __init__(
